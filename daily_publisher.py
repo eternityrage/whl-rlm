@@ -272,8 +272,13 @@ def main():
         
     # YouTube Shorts
     try:
-        upload_to_youtube(video_path, title, description, tags=["whales", "humpback", "ocean", "nature", "wildlife", "sea", "marinelife", "shorts", "reels"])
-        success_flags["youtube"] = True
+        result = upload_to_youtube(video_path, title, description, tags=["whales", "humpback", "ocean", "nature", "wildlife", "sea", "marinelife", "shorts", "reels"])
+        if result and result.get('status') == 'skipped':
+            print(f"⚠️  YouTube: Skipped ({result.get('reason', 'No credentials')})")
+        elif result and result.get('status') == 'error':
+            print(f"❌ YouTube upload failed: {result.get('reason')}")
+        else:
+            success_flags["youtube"] = True
     except Exception as e:
         print(f"❌ YouTube upload failed: {e}")
         
