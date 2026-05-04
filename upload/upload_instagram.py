@@ -59,6 +59,27 @@ def upload_to_instagram(video_path, caption, is_story=False):
             print(f"[instagram] ⚠️  Error during ID verification: {e}")
 
     if not user_id:
+        print("[instagram] 🔍 INSTAGRAM_ACCOUNT_ID not set. Attempting auto-discovery from Facebook Page...")
+        page_id = os.getenv('FACEBOOK_PAGE_ID') or os.getenv('FB_PAGE_ID')
+        if page_id and access_token:
+            try:
+                # Get Instagram Business Account ID from Facebook Page
+                ig_url = f"https://graph.facebook.com/v21.0/{page_id}?fields=instagram_business_account&access_token={access_token}"
+                ig_resp = requests.get(ig_url, timeout=15)
+                if ig_resp.status_code == 200:
+                    ig_data = ig_resp.json()
+                    ig_account = ig_data.get('instagram_business_account', {})
+                    if ig_account:
+                        user_id = ig_account.get('id')
+                        print(f"[instagram] ✅ Auto-discovered Instagram ID: {user_id}")
+                    else:
+                        print("[instagram] ⚠️ No Instagram Business Account connected to this Facebook Page.")
+                else:
+                    print(f"[instagram] ⚠️ Failed to fetch Instagram ID: {ig_resp.text}")
+            except Exception as e:
+                print(f"[instagram] ⚠️ Error during auto-discovery: {e}")
+
+    if not user_id:
         print("[instagram] ⚠️  Skipping Instagram upload - INSTAGRAM_ACCOUNT_ID not set")
         return {'status': 'skipped', 'reason': 'Missing credentials', 'platform': 'instagram'}
     

@@ -31,12 +31,8 @@ def get_authenticated_service():
     print(f"[youtube] Refresh Token: {mask(refresh_token)}")
 
     if not all([client_id, client_secret, refresh_token]):
-        raise ValueError(
-            "Missing credentials! Set these environment variables:\n"
-            "  - YOUTUBE_CLIENT_ID\n"
-            "  - YOUTUBE_CLIENT_SECRET\n"
-            "  - YOUTUBE_REFRESH_TOKEN"
-        )
+        print("[youtube] ⚠️  Missing credentials! Set YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_REFRESH_TOKEN")
+        return None
     
     # Create credentials from refresh token
     creds = Credentials(
@@ -55,10 +51,8 @@ def get_authenticated_service():
         if "invalid_grant" in str(e).lower():
             print("\n❌ [youtube] AUTH ERROR: Refresh token has EXPIRED or been REVOKED.")
             print("💡 SOLUTION: You must generate a NEW refresh token.")
-            print("   1. Go to Google Cloud Console.")
-            print("   2. Ensure your 'OAuth Consent Screen' is in 'Production' or add yourself as a test user.")
-            print("   3. Run a local script to get a new refresh token.")
-        raise
+            return "EXPIRED"
+        raise e
     
     return build('youtube', 'v3', credentials=creds)
 
@@ -66,8 +60,14 @@ def upload_to_youtube(video_path, title, description, tags=None, category_id='22
     """Upload video to YouTube and return result."""
     if tags is None:
         tags = ["whales", "humpback", "ocean", "nature", "wildlife", "sea", "marinelife", "shorts", "reels"]
+        
     youtube = get_authenticated_service()
     
+    if youtube is None:
+        return {'status': 'skipped', 'reason': 'Missing credentials', 'platform': 'youtube'}
+    if youtube == "EXPIRED":
+        return {'status': 'error', 'reason': 'Token expired', 'platform': 'youtube'}
+        
     body = {
         'snippet': {
             'title': title,

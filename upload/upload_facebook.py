@@ -64,7 +64,7 @@ def upload_to_facebook(video_path, description, title="Majestic Whales"):
         
         # Step 1: Initialize
         print(f"[facebook] Step 1: Initiating upload session...")
-        start_url = f"https://graph.facebook.com/v21.0/{page_id}/video_reels"
+        start_url = f"https://graph.facebook.com/v20.0/{page_id}/video_reels"
         start_data = {
             'access_token': access_token,
             'upload_phase': 'start',
@@ -100,7 +100,8 @@ def upload_to_facebook(video_path, description, title="Majestic Whales"):
             
         # Step 3: Finish
         print(f"[facebook] Step 3: Publishing Reel...")
-        finish_url = f"https://graph.facebook.com/v21.0/{page_id}/video_reels"
+        # Using v20.0 as it's often more stable for Reels
+        finish_url = f"https://graph.facebook.com/v20.0/{page_id}/video_reels"
         finish_data = {
             'access_token': access_token,
             'upload_phase': 'finish',
@@ -110,6 +111,15 @@ def upload_to_facebook(video_path, description, title="Majestic Whales"):
         }
         res_finish = requests.post(finish_url, data=finish_data, timeout=60)
         
+        # Handle specific error: "Please reduce the amount of data you're asking for"
+        # This can happen if the description is too complex or API is being temperamental
+        if res_finish.status_code != 200 and "reduce the amount of data" in res_finish.text:
+            print("[facebook] ⚠️  API error 'reduce data' detected. Retrying with simplified description...")
+            # Try with only the first sentence and no emojis/special characters if possible
+            simple_desc = description.split('.')[0] + "." if '.' in description else description[:100]
+            finish_data['description'] = simple_desc
+            res_finish = requests.post(finish_url, data=finish_data, timeout=60)
+
         if res_finish.status_code == 200 and res_finish.json().get('success'):
             print(f"[facebook] ✅ SUCCESS! Reel uploaded to Facebook!")
             print(f"[facebook] Video ID: {video_id}")
