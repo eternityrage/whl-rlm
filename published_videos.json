@@ -3070,5 +3070,21 @@
             },
             "recycled": true
         }
+    },
+    {
+        "video_name": "A_close-up_cinematic_shot_underwater,_202605250024_2.mp4",
+        "metadata": {
+            "title": "Whale Song: The Melodies of the Ocean \ud83c\udfb6",
+            "description": "Dive deep into the world of whales and discover the magic of the ocean. \ud83d\udc0b From their massive size to their gentle nature, humpbacks never cease to amaze. Every splash and every song tells a story of the deep. \ud83c\udf0a Like and share with a fellow ocean lover! \ud83d\udc99 #whales #ocean #nature #humpbackwhale #marinelife #sea #wildlife #shorts #reels",
+            "success_flags": {
+                "instagram_reel": false,
+                "instagram_story": false,
+                "facebook_reel": true,
+                "facebook_story": true,
+                "threads": false,
+                "youtube": false
+            },
+            "recycled": true
+        }
     }
 ]
